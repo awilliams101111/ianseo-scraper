@@ -24,7 +24,17 @@ As new use cases are added, expect additional peer folders next to [2025 H2Hs](2
 
 ## Current Workflow: 2025 H2Hs
 
-The [2025 H2Hs](2025%20H2Hs) workflow reads the `Shoots` sheet in `2025 H2H Shoots.xlsx` and processes rows where `Imported = 0`.
+The [2025 H2Hs](2025%20H2Hs) workflow is implemented in [2025 H2Hs/H2H-Scraper.ipynb](2025%20H2Hs/H2H-Scraper.ipynb).
+
+It uses the following workbook sheets:
+
+- `Shoots`: event metadata, URLs, tier, and import status
+- event sheets (one per event): archer-level results
+- `Ranking Points`: rank-to-points lookup by tier
+
+### Import and Enrichment
+
+The notebook reads the `Shoots` sheet in `2025 H2H Shoots.xlsx` and processes rows where `Imported = 0`.
 
 For each pending row it:
 
@@ -35,10 +45,29 @@ For each pending row it:
 	- `Name` from `Athlete`
 	- `Club` from `Country` or `Country or State Code` (numeric prefix removed)
 	- `Score` from `Tot.`
-4. Writes/updates a worksheet named from `Event Name`.
-5. Sets `Imported` to `1` for successfully processed rows.
+4. Adds `Ranking Points` via lookup:
+	- vertical lookup on `Rank`
+	- horizontal lookup on event `Tier`
+	- defaults to `0` points if no lookup value exists
+5. Writes/updates a worksheet named from `Event Name`.
+6. Sets `Imported` to `1` for successfully processed rows.
 
-Implementation is in [2025 H2Hs/H2H-Scraper.ipynb](2025%20H2Hs/H2H-Scraper.ipynb).
+Even when there are no pending URL imports, the notebook runs a separate pass to fill missing `Ranking Points` in existing event sheets.
+
+### Plotting
+
+The plotting section supports:
+
+1. `Score vs Rank` and `Score vs Points` toggle.
+2. Reversed x-axis for points view (decreasing to the right).
+3. Event show/hide controls with color swatches and alphabetical ordering.
+4. Tier-based coloring conventions and interactive hover details.
+
+### Important Limitation
+
+Any national ranking interpretation built from this workbook currently assumes archers finish in the same place after H2Hs as before H2Hs.
+That is a simplification for analysis convenience and is not how real events are finalized.
+Use downstream ranking conclusions with this limitation in mind.
 
 ## Setup
 
